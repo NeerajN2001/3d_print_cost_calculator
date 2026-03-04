@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Smart G-Code Cost Calculator</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100 p-6">
+
+<div class="max-w-6xl mx-auto bg-white p-6 rounded-xl shadow space-y-6">
+
+<h1 class="text-2xl font-bold">Smart G-Code Print Cost Calculator</h1>
+
+<!-- FILE UPLOAD -->
+<div>
+<label class="font-semibold">Upload G-code File</label>
+<input type="file" id="gcodeFile" accept=".gcode,.txt"
+class="border p-2 w-full rounded mt-1">
+</div>
+
+<!-- AUTO DATA -->
+<div class="grid grid-cols-5 gap-4 bg-slate-50 p-4 rounded">
+
+<input id="fileName" readonly placeholder="File Name" class="border p-2 rounded bg-gray-100">
+<input id="printerModel" readonly placeholder="Printer Model" class="border p-2 rounded bg-gray-100">
+<input id="nozzle" readonly placeholder="Nozzle" class="border p-2 rounded bg-gray-100">
+<input id="material" readonly placeholder="Material" class="border p-2 rounded bg-gray-100">
+<input id="weight" readonly placeholder="Weight (g)" class="border p-2 rounded bg-gray-100">
+
+</div>
+
+<div class="bg-slate-50 p-4 rounded">
+<input id="printHours" readonly placeholder="Print Time (hrs)" class="border p-2 rounded bg-gray-100 w-full">
+</div>
+
+<!-- COST INPUTS -->
+<div class="grid grid-cols-3 gap-4">
+<input id="machineRate" type="number" placeholder="Machine ₹ / hr" class="border p-2 rounded">
+<input id="electricityRate" type="number" placeholder="Electricity ₹ / hr" class="border p-2 rounded">
+<input id="labourRate" type="number" placeholder="Labour ₹ / hr" class="border p-2 rounded">
+<input id="failurePercent" type="number" value="3" placeholder="Failure %" class="border p-2 rounded">
+<input id="profitPercent" type="number" value="5" placeholder="Profit %" class="border p-2 rounded">
+</div>
+
+<div class="flex gap-4">
+<button onclick="addPart()" class="bg-blue-600 text-white px-6 py-2 rounded">
+Add Part
+</button>
+</div>
+
+<!-- PARTS TABLE -->
+<h2 class="text-lg font-bold mt-6">Invoice Parts</h2>
+
+<table class="w-full border mt-2">
+<thead class="bg-gray-200">
+<tr>
+<th class="border p-2">File</th>
+<th class="border p-2">Material</th>
+<th class="border p-2">Weight</th>
+<th class="border p-2">Time</th>
+<th class="border p-2">Total ₹</th>
+<th class="border p-2">Action</th>
+</tr>
+</thead>
+<tbody id="partsTable"></tbody>
+</table>
+
+<div class="text-xl font-bold mt-4">
+Grand Total: ₹ <span id="grandTotal">0.00</span>
+</div>
+
+<hr>
+
+<div class="grid grid-cols-2 gap-4">
+<input id="invoiceDate" type="date" class="border p-2 rounded">
+<input id="signatureInput" type="file" accept="image/*" class="border p-2 rounded">
+</div>
+
+<button onclick="generateInvoice()" class="bg-green-600 text-white px-6 py-2 rounded">
+Generate Invoice
+</button>
+
+</div>
+
+<script>
+
+/* DATABASES */
+const MATERIAL_DB = { PLA:1200, PETG:2500, ABS:1800, TPU:2900 };
+const PRINTER_DB = {
+"Anycubic Kobra 2 Neo":25,
+"Bambu Lab X1C":60,
+"Ender 3":20
+};
+
+let invoiceParts = [];
+let grandTotal = 0;
+
+/* FILE PARSER */
+document.getElementById("gcodeFile").addEventListener("change", function(e){
+const file = e.target.files[0];
+if(!file) return;
+
+fileName.value = file.name.replace(/\.[^/.]+$/, "");
+
+const reader = new FileReader();
+reader.onload = function(event){
+const text = event.target.result;
+
+const filamentMatch = text.match(/used_filament\s*=\s*([\d.]+)/i);
+const timeMatch = text.match(/print_time\s*=\s*([^\n]+)/i);
+const materialMatch = text.match(/"material_type"\s*:\s*"(.*?)"/i);
+const printerMatch = text.match(/printer_model\s*=\s*(.*)/i);
+const nozzleMatch = text.match(/nozzle_diameter\s*=\s*([\d.]+)/i);
+
+if(filamentMatch) weight.value=parseFloat(filamentMatch[1]).toFixed(2);
+if(timeMatch) printHours.value=convertToHours(timeMatch[1]).toFixed(2);
+if(materialMatch) material.value=materialMatch[1];
+if(printerMatch){
+const model=printerMatch[1].trim();
+printerModel.value=model;
+if(PRINTER_DB[model]) machineRate.value=PRINTER_DB[model];
+}
+if(nozzleMatch) nozzle.value=nozzleMatch[1];
+};
+reader.readAsText(file);
+});
+
+function convertToHours(str){
+let h=0;
+const H=str.match(/(\d+)\s*h/);
+const M=str.match(/(\d+)\s*m/);
+const S=str.match(/(\d+)\s*s/);
+if(H) h+=parseInt(H[1]);
+if(M) h+=parseInt(M[1])/60;
+if(S) h+=parseInt(S[1])/3600;
+return h;
+}
+
+/* ADD PART */
+function addPart(){
+
+const mat=material.value;
+const weightG=parseFloat(weight.value);
+const hours=parseFloat(printHours.value);
+
+if(!mat||!weightG||!hours){alert("Upload G-code first");return;}
+if(!MATERIAL_DB[mat]){alert("Material missing in DB");return;}
+
+const machine=parseFloat(machineRate.value||0);
+const electricity=parseFloat(electricityRate.value||0);
+const labour=parseFloat(labourRate.value||0);
+const failure=parseFloat(failurePercent.value||0);
+const profit=parseFloat(profitPercent.value||0);
+
+const materialCost=(MATERIAL_DB[mat]/1000)*weightG;
+const machineCost=machine*hours;
+const electricityCost=electricity*hours;
+const labourCost=labour*hours;
+
+let subtotal=materialCost+machineCost+electricityCost+labourCost;
+subtotal+=subtotal*(failure/100);
+const total=subtotal*(1+profit/100);
+
+invoiceParts.push({
+file:fileName.value,
+printer:printerModel.value,
+nozzle:nozzle.value,
+material:mat,
+weight:weightG,
+hours:hours,
+total:total
+});
+
+grandTotal+=total;
+renderTable();
+clearFields();
+}
+
+function renderTable(){
+  partsTable.innerHTML = "";
+  grandTotal = 0;
+
+  invoiceParts.forEach((p, index) => {
+
+    grandTotal += p.total;
+
+    partsTable.innerHTML += `
+    <tr>
+      <td class="border p-2">${p.file}</td>
+      <td class="border p-2">${p.material}</td>
+      <td class="border p-2">${p.weight} g</td>
+      <td class="border p-2">${p.hours.toFixed(2)}</td>
+      <td class="border p-2">₹ ${p.total.toFixed(2)}</td>
+      <td class="border p-2 text-center">
+        <button onclick="deletePart(${index})"
+          class="bg-red-500 text-white px-2 py-1 rounded text-sm">
+          Delete
+        </button>
+      </td>
+    </tr>`;
+  });
+
+  document.getElementById("grandTotal").textContent = grandTotal.toFixed(2);
+}
+
+function deletePart(index){
+  if(confirm("Remove this part from invoice?")){
+    invoiceParts.splice(index, 1);
+    renderTable();
+  }
+}
+
+function clearFields(){
+document.getElementById("gcodeFile").value="";
+fileName.value="";
+printerModel.value="";
+nozzle.value="";
+material.value="";
+weight.value="";
+printHours.value="";
+}
+
+/* INVOICE */
+function generateInvoice(){
+if(invoiceParts.length===0){alert("No parts added");return;}
+
+const date=invoiceDate.value||new Date().toISOString().split('T')[0];
+const invoiceNumber="INV-"+Date.now();
+const sigInput=document.getElementById("signatureInput");
+
+if(sigInput.files.length>0){
+const reader=new FileReader();
+reader.onload=()=>saveInvoice(date,invoiceNumber,reader.result);
+reader.readAsDataURL(sigInput.files[0]);
+}else{
+saveInvoice(date,invoiceNumber,null);
+}
+}
+
+function saveInvoice(date,number,signature){
+localStorage.setItem("invoiceData",JSON.stringify({
+company:"Your Company Name",
+address:"City, State",
+contact:"email@example.com",
+invoiceNumber:number,
+date:date,
+signature:signature,
+items:invoiceParts,
+grandTotal:grandTotal
+}));
+window.open("invoice.html","_blank");
+}
+</script>
+</body>
+</html>

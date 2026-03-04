@@ -1,0 +1,48 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+}
+
+.invoice {
+  width: 210mm;
+  margin: auto;
+  background: white;
+  padding: 20mm;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th, td {
+  border: 1px solid black;
+  padding: 6px;
+  font-size: 12px;
+}
+
+.grand {
+  text-align: right;
+  margin-top: 20px;
+  font-weight: bold;
+}
+
+.signature {
+  margin-top: 40px;
+  text-align: right;
+}
+
+.signature img {
+  height: 60px;
+}
+
+button {
+  margin-top: 20px;
+}
+
+@media print {
+  button {
+    display: none;
+  }
+}

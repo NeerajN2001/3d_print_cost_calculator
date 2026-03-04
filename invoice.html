@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Invoice</title>
+<link rel="stylesheet" href="invoice.css">
+</head>
+<body>
+
+<div class="invoice">
+
+<header>
+<h1 id="company"></h1>
+<p id="address"></p>
+<p id="contact"></p>
+<h2>INVOICE</h2>
+<p>Invoice No: <span id="invoiceNumber"></span></p>
+<p>Date: <span id="date"></span></p>
+</header>
+
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Printer</th>
+<th>Nozzle</th>
+<th>Material</th>
+<th>Weight</th>
+<th>Time (hrs)</th>
+<th>Total (₹)</th>
+</tr>
+</thead>
+<tbody id="rows"></tbody>
+</table>
+
+<div class="grand">
+Grand Total: ₹ <span id="grandTotal"></span>
+</div>
+
+<div class="signature">
+<img id="signatureImg">
+</div>
+
+<button onclick="window.print()">Download PDF</button>
+
+</div>
+
+<script src="invoice.js"></script>
+</body>
+</html>
