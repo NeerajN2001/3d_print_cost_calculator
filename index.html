@@ -37,9 +37,9 @@ class="border p-2 w-full rounded mt-1">
 
 <!-- COST INPUTS -->
 <div class="grid grid-cols-3 gap-4">
-<input id="machineRate" type="number" placeholder="Machine ₹ / hr" class="border p-2 rounded">
-<input id="electricityRate" type="number" placeholder="Electricity ₹ / hr" class="border p-2 rounded">
-<input id="labourRate" type="number" placeholder="Labour ₹ / hr" class="border p-2 rounded">
+<input id="machineRate" type="number" value="15" placeholder="Machine ₹ / hr" class="border p-2 rounded">
+<input id="electricityRate" type="number" value="10" placeholder="Electricity ₹ / hr" class="border p-2 rounded">
+<input id="labourRate" type="number" value="20" placeholder="Labour ₹ / hr" class="border p-2 rounded">
 <input id="failurePercent" type="number" value="3" placeholder="Failure %" class="border p-2 rounded">
 <input id="profitPercent" type="number" value="5" placeholder="Profit %" class="border p-2 rounded">
 </div>
@@ -148,11 +148,11 @@ const hours=parseFloat(printHours.value);
 if(!mat||!weightG||!hours){alert("Upload G-code first");return;}
 if(!MATERIAL_DB[mat]){alert("Material missing in DB");return;}
 
-const machine=parseFloat(machineRate.value||0);
-const electricity=parseFloat(electricityRate.value||0);
-const labour=parseFloat(labourRate.value||0);
-const failure=parseFloat(failurePercent.value||0);
-const profit=parseFloat(profitPercent.value||0);
+const machine=parseFloat(machineRate.value||15);
+const electricity=parseFloat(electricityRate.value||10);
+const labour=parseFloat(labourRate.value||20);
+const failure=parseFloat(failurePercent.value||3);
+const profit=parseFloat(profitPercent.value||5);
 
 const materialCost=(MATERIAL_DB[mat]/1000)*weightG;
 const machineCost=machine*hours;
