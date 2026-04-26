@@ -37,8 +37,8 @@ class="border p-2 w-full rounded mt-1">
 
 <!-- COST INPUTS -->
 <div class="grid grid-cols-3 gap-4">
-<input id="machineRate" type="number" value="15" placeholder="Machine ₹ / hr" class="border p-2 rounded">
-<input id="electricityRate" type="number" value="10" placeholder="Electricity ₹ / hr" class="border p-2 rounded">
+<input id="machineRate" type="number" value="10" placeholder="Machine ₹ / hr" class="border p-2 rounded">
+<input id="electricityRate" type="number" value="7" placeholder="Electricity ₹ / hr" class="border p-2 rounded">
 <input id="labourRate" type="number" value="20" placeholder="Labour ₹ / hr" class="border p-2 rounded">
 <input id="failurePercent" type="number" value="3" placeholder="Failure %" class="border p-2 rounded">
 <input id="profitPercent" type="number" value="5" placeholder="Profit %" class="border p-2 rounded">
@@ -87,7 +87,7 @@ Generate Invoice
 <script>
 
 /* DATABASES */
-const MATERIAL_DB = { PLA:900, PETG:2500, ABS:1200, TPU:2900 };
+const MATERIAL_DB = { PLA:800, PETG:2500, ABS:1100, TPU:2900 };
 const PRINTER_DB = {
 "Anycubic Kobra 2 Neo":25,
 "Bambu Lab X1C":60,
