@@ -108,7 +108,7 @@ const reader = new FileReader();
 reader.onload = function(event){
 const text = event.target.result;
 
-const filamentMatch = text.match(/used_filament\s*=\s*([\d.]+)/i);
+const filamentMatch = text.match(/filament used [g]\s*=\s*([\d.]+)/i);
 const timeMatch = text.match(/print_time\s*=\s*([^\n]+)/i);
 const materialMatch = text.match(/"material_type"\s*:\s*"(.*?)"/i);
 const printerMatch = text.match(/printer_model\s*=\s*(.*)/i);
