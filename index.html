@@ -99,34 +99,34 @@ let grandTotal = 0;
 
 /* FILE PARSER */
 document.getElementById("gcodeFile").addEventListener("change", function(e){
-const file = e.target.files[0];
-if(!file) return;
+    const file = e.target.files[0];
+    if(!file) return;
 
-fileName.value = file.name.replace(/\.[^/.]+$/, "");
+    fileName.value = file.name.replace(/\.[^/.]+$/, "");
 
-const reader = new FileReader();
-reader.onload = function(event){
-const text = event.target.result;
+    const reader = new FileReader();
+    reader.onload = function(event){
+        const text = event.target.result;
 
-const filamentMatch = text.match(/filament used [g]\s*=\s*([\d.]+)/i);
-const timeMatch = text.match(/print_time\s*=\s*([^\n]+)/i);
-const materialMatch = text.match(/"material_type"\s*:\s*"(.*?)"/i);
-const printerMatch = text.match(/printer_model\s*=\s*(.*)/i);
-const nozzleMatch = text.match(/nozzle_diameter\s*=\s*([\d.]+)/i);
+        // FIXED regexes
+        const filamentMatch = text.match(/filament used \[g\]\s*=\s*([\d.]+)/i);
+        const timeMatch = text.match(/estimated printing time.*?=\s*([\dhms\s]+)/i);
+        const materialMatch = text.match(/"material_type"\s*:\s*"(.*?)"/i);
+        const printerMatch = text.match(/printer_model\s*=\s*(.*)/i);
+        const nozzleMatch = text.match(/nozzle_diameter\s*=\s*([\d.]+)/i);
 
-if(filamentMatch) weight.value=parseFloat(filamentMatch[1]).toFixed(2);
-if(timeMatch) printHours.value=convertToHours(timeMatch[1]).toFixed(2);
-if(materialMatch) material.value=materialMatch[1];
-if(printerMatch){
-const model=printerMatch[1].trim();
-printerModel.value=model;
-if(PRINTER_DB[model]) machineRate.value=PRINTER_DB[model];
-}
-if(nozzleMatch) nozzle.value=nozzleMatch[1];
-};
-reader.readAsText(file);
+        if(filamentMatch) weight.value = parseFloat(filamentMatch[1]).toFixed(2);
+        if(timeMatch) printHours.value = convertToHours(timeMatch[1]).toFixed(2);
+        if(materialMatch) material.value = materialMatch[1];
+        if(printerMatch){
+            const model = printerMatch[1].trim();
+            printerModel.value = model;
+            if(PRINTER_DB[model]) machineRate.value = PRINTER_DB[model];
+        }
+        if(nozzleMatch) nozzle.value = nozzleMatch[1];
+    };
+    reader.readAsText(file);
 });
-
 function convertToHours(str){
 let h=0;
 const H=str.match(/(\d+)\s*h/);
